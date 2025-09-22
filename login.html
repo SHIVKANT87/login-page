@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login Animation</title>
+<style>
+  /* ---------------- Body and Background ---------------- */
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, purple, orange);
+    transition: background 1s ease;
+  }
+
+  /* ---------------- Falling Orange Leaves (Tree) ---------------- */
+  .leaf {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    background: orange;
+    border-radius: 50%;
+    animation: leafFall 5s linear infinite;
+  }
+
+  @keyframes leafFall {
+    0% { transform: translateY(-50px) rotate(0deg); }
+    100% { transform: translateY(100vh) rotate(360deg); }
+  }
+
+  /* ---------------- Login Box ---------------- */
+  .login-container {
+    background: rgba(0,0,0,0);
+    padding: 40px;
+    border-radius: 15px;
+    text-align: center;
+    color: white;
+    width: 350px;
+    box-shadow: 0 0 30px 5px rgba(255,255,255,0.9);
+    z-index: 10;
+    position: relative;
+  }
+
+  .login-container h2 {
+    margin-bottom: 20px;
+    color: #ffcc66;
+  }
+
+  .login-container input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    background: rgba(255,255,255,0.1);
+    color: white;
+  }
+
+  .login-container input::placeholder {
+    color: rgba(255,255,255,0.7);
+  }
+
+  .login-container button {
+    padding: 12px 20px;
+    margin-top: 10px;
+    width: 100%;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #ff8c00;
+    color: white;
+    font-weight: bold;
+    transition: 0.3s;
+    font-size: 16px;
+  }
+
+  .login-container button:hover {
+    background: #ffa500;
+  }
+
+  .login-container .links {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin-top: 10px;
+  }
+
+  .login-container .links a {
+    color: #ffcc66;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .login-container .links a:hover {
+    text-decoration: underline;
+  }
+
+  /* ---------------- Post-login Animation ---------------- */
+  .animation-container {
+    position: absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    background: black;
+    z-index: 20;
+    overflow: hidden;
+    display: none;
+  }
+
+  /* Doors */
+  .door {
+    position: relative;
+    width: 200px;
+    height: 300px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .door-left, .door-right {
+    width: 100px;
+    height: 300px;
+    background: brown;
+    border: 2px solid #654321;
+    transform-origin: left;
+    transition: transform 1.5s ease;
+  }
+  .door-right {
+    transform-origin: right;
+  }
+
+  /* Light Bulb */
+  .light {
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: yellow;
+    opacity: 0;
+    position: absolute;
+    top: 50px;
+    transition: all 1s ease;
+    box-shadow: 0 0 30px 10px yellow;
+  }
+
+  /* Cat */
+  .cat {
+    font-size: 50px;
+    opacity: 0;
+    position: absolute;
+    top: 250px;
+    transition: all 1s ease;
+  }
+
+  /* LOVE Text */
+  .love-text {
+    color: pink;
+    font-size: 60px;
+    opacity: 0;
+    margin-top: 50px;
+    transition: opacity 1s ease;
+  }
+
+  /* Falling Yellow Leaves after login */
+  .yellow-leaf {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    background: orange;
+    border-radius: 50%;
+    animation: leafFall 5s linear infinite;
+  }
+</style>
+</head>
+<body>
+
+<!-- Login Form -->
+<div class="login-container">
+  <h2>Login</h2>
+  <input type="text" id="username" placeholder="Username">
+  <input type="password" id="password" placeholder="Password">
+  <button id="loginBtn">Login</button>
+  <div class="links">
+    <a href="#">Sign Up</a>
+    <a href="#">Register</a>
+    <a href="#">Forgot?</a>
+  </div>
+</div>
+
+<!-- Post-login Animation -->
+<div class="animation-container">
+  <div class="door">
+    <div class="door-left"></div>
+    <div class="door-right"></div>
+  </div>
+  <div class="light"></div>
+  <div class="cat">🐱</div>
+  <h1 class="love-text">LOVE</h1>
+</div>
+
+<script>
+  const body = document.body;
+
+  // Generate initial orange leaves (tree)
+  for(let i=0; i<30; i++){
+    const leaf = document.createElement('div');
+    leaf.classList.add('leaf');
+    leaf.style.left = Math.random() * 100 + 'vw';
+    leaf.style.animationDuration = 3 + Math.random() * 5 + 's';
+    leaf.style.width = 10 + Math.random() * 20 + 'px';
+    leaf.style.height = leaf.style.width;
+    body.appendChild(leaf);
+  }
+
+  // Login Button
+  document.getElementById('loginBtn').addEventListener('click', () => {
+    const user = document.getElementById('username').value;
+    const pass = document.getElementById('password').value;
+
+    if(user && pass){
+      // Hide login form
+      document.querySelector('.login-container').style.display = 'none';
+
+      // Show animation container
+      const anim = document.querySelector('.animation-container');
+      anim.style.display = 'flex';
+
+      // Open doors
+      const doorLeft = document.querySelector('.door-left');
+      const doorRight = document.querySelector('.door-right');
+      setTimeout(() => {
+        doorLeft.style.transform = 'rotateY(-120deg)';
+        doorRight.style.transform = 'rotateY(120deg)';
+      }, 500);
+
+      // Turn on light
+      const light = document.querySelector('.light');
+      setTimeout(() => {
+        light.style.width = '200px';
+        light.style.height = '200px';
+        light.style.opacity = 0.8;
+      }, 1500);
+
+      // Cat appears
+      const cat = document.querySelector('.cat');
+      setTimeout(() => {
+        cat.style.opacity = 1;
+        cat.style.top = '180px';
+      }, 2000);
+
+      // LOVE text appears
+      const love = document.querySelector('.love-text');
+      setTimeout(() => {
+        love.style.opacity = 1;
+      }, 2500);
+
+      // Falling orange leaves after login
+      for(let i=0; i<30; i++){
+        const leaf = document.createElement('div');
+        leaf.classList.add('yellow-leaf');
+        leaf.style.left = Math.random() * 100 + 'vw';
+        leaf.style.animationDuration = 3 + Math.random() * 5 + 's';
+        leaf.style.width = 10 + Math.random() * 20 + 'px';
+        leaf.style.height = leaf.style.width;
+        anim.appendChild(leaf);
+      }
+
+    } else {
+      alert('Please enter username and password.');
+    }
+  });
+</script>
+
+</body>
+</html>
