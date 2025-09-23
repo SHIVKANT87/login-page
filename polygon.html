@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Polygon Login — Demo</title>
+  <style>
+    :root{
+      --bg1: linear-gradient(135deg,#171923 0%, #0f172a 100%);
+      --accent: #7c5cff;
+      --accent-2: #3dd7b1;
+      --card-bg: rgba(255,255,255,0.04);
+      --glass: rgba(255,255,255,0.06);
+      --text: #e6eef8;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, 'Noto Sans', 'Helvetica Neue', Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0}
+    body{
+      background: var(--bg1);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:32px;
+    }
+
+    .wrap{width:100%;max-width:980px;display:grid;grid-template-columns: 1fr 420px;gap:28px;align-items:center;}
+    .art{height:520px;position:relative;border-radius:18px;overflow:hidden;background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);box-shadow: 0 8px 30px rgba(2,6,23,0.6);padding:26px;display:flex;align-items:center;justify-content:center;}
+    .poly-layer{position:absolute; inset:0; display:block;}
+    svg{width:100%;height:100%;display:block}
+
+    .card{background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));border-radius:14px;padding:28px;box-shadow: 0 6px 30px rgba(2,6,23,0.5);border:1px solid rgba(255,255,255,0.035);}
+    h1{margin:0 0 6px 0;font-size:22px}
+    p.lead{margin:0 0 18px 0;opacity:0.85}
+
+    form{display:flex;flex-direction:column;gap:12px}
+    label{font-size:13px;opacity:0.9}
+    input[type="text"], input[type="password"], input[type="email"]{width:100%;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:var(--text);outline:none;font-size:15px}
+    .row{display:flex;gap:10px}
+    .btn{margin-top:6px;padding:12px 14px;border-radius:10px;border:0;font-weight:600;cursor:pointer;font-size:15px;background-image:linear-gradient(90deg,var(--accent),var(--accent-2));color:#061019;box-shadow:0 6px 18px rgba(124,92,255,0.12);}
+    .muted{font-size:13px;opacity:0.8}
+    .links{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+    .show-pass{background:none;border:0;color:var(--text);cursor:pointer;font-size:13px}
+    .foot{margin-top:14px;font-size:13px;opacity:0.8;text-align:center}
+
+    @media(max-width:880px){.wrap{grid-template-columns:1fr;max-width:720px}.art{height:360px}}
+
+    .input-error{border-color:#ff6b6b!important}
+    .error-text{color:#ffb3b3;font-size:13px}
+
+    /* dashboard */
+    #dashboard{display:none;flex-direction:column;align-items:center;justify-content:center;height:100%;width:100%;}
+    .nav{display:flex;gap:20px;justify-content:center;margin-bottom:20px;}
+    .nav button{padding:10px 16px;border:none;border-radius:8px;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#061019;font-weight:600;cursor:pointer;}
+    .tesla-img{max-width:80%;border-radius:12px;box-shadow:0 6px 30px rgba(2,6,23,0.7);}
+  </style>
+</head>
+<body>
+  <div id="loginSection" class="wrap">
+    <div class="art" aria-hidden="true">
+      <div class="poly-layer">
+        <svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+          <polygon points="1200,0 800,0 700,200 1200,240" fill="rgba(124,92,255,0.4)"></polygon>
+          <polygon points="0,0 420,0 300,220 0,180" fill="rgba(61,215,177,0.2)"></polygon>
+        </svg>
+      </div>
+      <div style="position:relative;z-index:3;text-align:center;max-width:300px;color:rgba(255,255,255,0.95);">
+        <h2 style="margin:0 0 6px;font-size:20px;color:var(--text)">Polygon — Login</h2>
+        <p style="margin:0;font-size:14px;opacity:0.85">Enter username and password</p>
+      </div>
+    </div>
+
+    <div class="card" role="region" aria-label="Login form">
+      <h1>Sign in</h1>
+      <form id="loginForm" onsubmit="return false;">
+        <div>
+          <label for="username">Username</label>
+          <input id="username" name="username" type="text" placeholder="Enter username" required />
+        </div>
+        <div>
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" placeholder="Enter password" required />
+        </div>
+        <div class="row">
+          <button class="btn" id="submitBtn" onclick="handleLogin()">Sign In</button>
+        </div>
+        <div id="loginError" class="error-text" style="display:none;margin-top:8px">Invalid username or password</div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Dashboard Section -->
+  <div id="dashboard">
+    <div class="nav">
+      <button>Home</button>
+      <button>Search</button>
+      <button>Setting</button>
+      <button>About</button>
+      <button>Customer</button>
+      <button>Help</button>
+    </div>
+    <img src="https://tesla-cdn.thron.com/delivery/public/image/tesla/8f2f1d2b-b8cb-479b-b3c2-5cf0f0c5e2b2/bvlatuR/std/1920x1080/Model-S-Main-Hero-Desktop-LHD" alt="Tesla Model" class="tesla-img" />
+  </div>
+
+  <script>
+    const FIXED_USERNAME = "Admin";
+    const FIXED_PASSWORD = "999999";
+
+    function handleLogin(){
+      const user = document.getElementById('username').value.trim();
+      const pass = document.getElementById('password').value.trim();
+      const error = document.getElementById('loginError');
+
+      if(user === FIXED_USERNAME && pass === FIXED_PASSWORD){
+        document.getElementById('loginSection').style.display='none';
+        document.getElementById('dashboard').style.display='flex';
+      } else {
+        error.style.display='block';
+      }
+    }
+  </script>
+</body>
+</html>
