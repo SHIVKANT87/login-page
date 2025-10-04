@@ -122,4 +122,178 @@
     }
   </script>
 </body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reptile Interactive Cursor</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: radial-gradient(circle at center, #0b0f15 0%, #05080c 100%);
+    height: 100%;
+    cursor: none;
+  }
+  canvas {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+  }
+  .hint {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    font-family: monospace;
+    color: #9ef5b5;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    user-select: none;
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="hint">🦎 Move cursor / tap — click to ripple</div>
+
+<script>
+(() => {
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+  let W, H;
+  const DPR = window.devicePixelRatio || 1;
+
+  function resize() {
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = W * DPR;
+    canvas.height = H * DPR;
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  window.addEventListener("resize", resize);
+  resize();
+
+  const Input = { x: W/2, y: H/2, down: false };
+
+  window.addEventListener("mousemove", e => {
+    Input.x = e.clientX;
+    Input.y = e.clientY;
+  });
+  window.addEventListener("mousedown", e => {
+    Input.down = true;
+    spawnRipple(e.clientX, e.clientY);
+  });
+  window.addEventListener("mouseup", () => Input.down = false);
+  window.addEventListener("touchmove", e => {
+    const t = e.touches[0];
+    if (t) { Input.x = t.clientX; Input.y = t.clientY; }
+  }, { passive: true });
+  window.addEventListener("touchstart", e => {
+    const t = e.touches[0];
+    if (t) spawnRipple(t.clientX, t.clientY);
+  }, { passive: true });
+
+  const SEGMENTS = 40;
+  const SEG_DIST = 15;
+  const segments = Array.from({ length: SEGMENTS }, (_, i) => ({
+    x: Input.x - i * SEG_DIST,
+    y: Input.y,
+    angle: 0
+  }));
+
+  const ripples = [];
+
+  function spawnRipple(x, y) {
+    ripples.push({ x, y, r: 0, alpha: 1 });
+  }
+
+  function update(dt) {
+    const head = segments[0];
+    head.x += (Input.x - head.x) * 0.25;
+    head.y += (Input.y - head.y) * 0.25;
+
+    for (let i = 1; i < SEGMENTS; i++) {
+      const prev = segments[i - 1];
+      const s = segments[i];
+      const dx = prev.x - s.x;
+      const dy = prev.y - s.y;
+      const dist = Math.hypot(dx, dy);
+      const angle = Math.atan2(dy, dx);
+      const tx = prev.x - Math.cos(angle) * SEG_DIST;
+      const ty = prev.y - Math.sin(angle) * SEG_DIST;
+      s.x += (tx - s.x) * 0.9;
+      s.y += (ty - s.y) * 0.9;
+      s.angle = angle;
+    }
+
+    for (let r of ripples) {
+      r.r += dt * 0.3;
+      r.alpha -= dt * 0.0008;
+    }
+    for (let i = ripples.length - 1; i >= 0; i--) {
+      if (ripples[i].alpha <= 0) ripples.splice(i, 1);
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    // Ripples
+    for (const r of ripples) {
+      ctx.beginPath();
+      ctx.arc(r.x, r.y, r.r, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(100,255,180,${r.alpha})`;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    // Tail
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    for (let i = SEGMENTS - 1; i > 0; i--) {
+      const s = segments[i];
+      const t = i / SEGMENTS;
+      ctx.beginPath();
+      ctx.moveTo(s.x, s.y);
+      const prev = segments[i - 1];
+      ctx.lineTo(prev.x, prev.y);
+      const g = Math.floor(100 + 120 * (1 - t));
+      ctx.strokeStyle = `rgba(${g},255,${150 - g / 3},${0.7 - t / 2})`;
+      ctx.lineWidth = 10 * (1 - t) + 1.5;
+      ctx.shadowColor = `rgba(100,255,150,${0.5 - t / 3})`;
+      ctx.shadowBlur = 15 * (1 - t);
+      ctx.stroke();
+    }
+
+    // Head glow
+    const h = segments[0];
+    ctx.beginPath();
+    ctx.arc(h.x, h.y, 10, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(120,255,180,0.9)";
+    ctx.shadowColor = "rgba(120,255,180,1)";
+    ctx.shadowBlur = 30;
+    ctx.fill();
+
+    // Reset shadow
+    ctx.shadowBlur = 0;
+  }
+
+  let last = performance.now();
+  function loop(now) {
+    const dt = now - last;
+    last = now;
+    update(dt);
+    draw();
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
 </html>
+
